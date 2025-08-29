@@ -71,6 +71,16 @@ type ConnectorConfig struct {
 	LogoSVG string `json:"logo_svg"`
 }
 
+var base64chars = strings.Split("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_", "")
+
+func randomString(length int) (ret string) {
+	l := len(base64chars)
+	for i := 0; i < length; i++ {
+		ret = ret + base64chars[rand.Intn(l)]
+	}
+	return
+}
+
 func init() {
 	plugin.Register(&Connector{
 		Config: &ConnectorConfig{},
@@ -117,7 +127,8 @@ func (g *Connector) ConnectorSender(ctx *plugin.GinContext, receiverURL string) 
 		RedirectURL: receiverURL,
 		Scopes:      strings.Split(g.Config.Scope, ","),
 	}
-	return oauth2Config.AuthCodeURL("state")
+	state := randomString(24)
+	return oauth2Config.AuthCodeURL(state)
 }
 
 func (g *Connector) ConnectorReceiver(ctx *plugin.GinContext, receiverURL string) (userInfo plugin.ExternalLoginUserInfo, err error) {
