@@ -1,6 +1,6 @@
 module github.com/apache/answer-plugins/search-algolia
 
-go 1.22.0
+go 1.23.0
 
 require (
 	github.com/algolia/algoliasearch-client-go/v4 v4.28.1

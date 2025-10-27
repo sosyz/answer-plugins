@@ -22,7 +22,7 @@ package wecom
 type WebhookReq struct {
 	MsgType  string `json:"msgtype"`
 	Markdown struct {
-		Text  string `json:"content"`
+		Text string `json:"content"`
 	} `json:"markdown"`
 }
 
@@ -30,9 +30,9 @@ func NewWebhookReq(content string) *WebhookReq {
 	return &WebhookReq{
 		MsgType: "markdown",
 		Markdown: struct {
-			Text  string `json:"content"`
+			Text string `json:"content"`
 		}{
-			Text:  content,
+			Text: content,
 		},
 	}
 }
