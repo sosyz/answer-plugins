@@ -20,8 +20,8 @@ github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuy
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
 github.com/alecthomas/units v0.0.0-20190717042225-c3de453c63f4/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
-github.com/apache/answer v1.6.0 h1:RZllwvmB8rw1Uk/gMTdjiJ6IpynaB1ZRESRWZzBzO8I=
-github.com/apache/answer v1.6.0/go.mod h1:U9uBDAc1XzJdwwqX9u4ya2lWC3wXU8OBt0SnmXtSxro=
+github.com/apache/answer v1.7.0 h1:gialaumCHfBp0mhnwm3H1iWRrWL23st8K3dMnG5mCik=
+github.com/apache/answer v1.7.0/go.mod h1:Uu1qVuCsmDmehjlUpYOBLuFt5b/E1HLlVCdZvtVRC9U=
 github.com/apache/answer-plugins/util v1.0.3 h1:RrQ1wnNeOr1HVvqDWqWS22ZtWx9oB9c/y/lZpII0tXM=
 github.com/apache/answer-plugins/util v1.0.3/go.mod h1:wQEKNXVa/BKKq5yro9qo5bFiO3/SW1noORabxEndk3o=
 github.com/apache/thrift v0.12.0/go.mod h1:cp2SuWMxlEZw2r+iP2GNCdIi4C1qmUzdZFSVb+bacwQ=

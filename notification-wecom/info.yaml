@@ -17,6 +17,6 @@
 
 slug_name: wecom_notification
 type: notification
-version: 1.0.2
+version: 1.0.3
 author: lihui
 link: https://github.com/apache/answer-plugins/tree/main/notification-wecom

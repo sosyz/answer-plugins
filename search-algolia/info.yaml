@@ -17,6 +17,6 @@
 
 slug_name: algolia-search
 type: search
-version: 2.0.0
+version: 2.0.1
 author: answerdev
 link: https://github.com/apache/answer-plugins/tree/main/search-algolia

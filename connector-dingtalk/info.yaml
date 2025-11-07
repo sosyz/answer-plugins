@@ -17,6 +17,6 @@
 
 slug_name: dingtalk_connector
 type: connector
-version: 1.0.4
+version: 1.0.5
 author: xbmlz
 link: https://github.com/apache/answer-plugins/tree/main/connector-dingtalk

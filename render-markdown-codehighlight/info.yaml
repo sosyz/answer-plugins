@@ -17,6 +17,6 @@
 
 slug_name: render_markdown_codehighlight
 type: render
-version: 1.0.0
+version: 1.0.1
 author: Chen Jiaji, Zhu Xuanlyu
 link: https://github.com/apache/answer-plugins/tree/main/render-markdown-codehighlight
