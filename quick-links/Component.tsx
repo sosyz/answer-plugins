@@ -20,7 +20,7 @@
 import { useTranslation } from 'react-i18next';
 import useSWR from 'swr'
 
-const Component = ({ navigate, request }) => {
+const Component = ({ navigate, request, hasDivider }) => {
 
   const { t } = useTranslation('plugin', {
     keyPrefix: 'quick_links.frontend',
@@ -54,6 +54,7 @@ const Component = ({ navigate, request }) => {
 
   return (
     <div>
+      {hasDivider && <div className="border-top mt-3" />}
       <div className="py-2 px-3 mt-3 small fw-bold quick-link">{t('quick_links')}</div>
       {tags?.map((tag) => {
         const href = `/tags/${encodeURIComponent(tag.slug_name)}`
