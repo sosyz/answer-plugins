@@ -132,9 +132,12 @@ const Component: FC<EditorProps> = ({
           : undefined,
         editorPlugins: onChange
           ? [
-              createOnChangePlugin((content) => {
-                onChangeRef.current?.(content);
-              }),
+              createOnChangePlugin(
+                () => editorInstanceRef.current,
+                (content: string) => {
+                  onChangeRef.current?.(content);
+                }
+              ),
             ]
           : [],
       });
