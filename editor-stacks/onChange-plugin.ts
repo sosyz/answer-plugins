@@ -18,7 +18,7 @@
  */
 
 import { Plugin } from "prosemirror-state";
-import type { EditorPlugin } from "@stackoverflow/stacks-editor";
+import type { EditorPlugin, StacksEditor } from "@stackoverflow/stacks-editor";
 
 /**
  * Creates a StacksEditor plugin that listens to content changes.
@@ -27,10 +27,12 @@ import type { EditorPlugin } from "@stackoverflow/stacks-editor";
  *
  * Works in both RichText and Markdown modes automatically.
  *
+ * @param getEditor Function that returns the StacksEditor instance
  * @param onUpdate Callback function that receives the updated editor content
  * @returns A StacksEditor EditorPlugin
  */
 export const createOnChangePlugin = (
+  getEditor: () => StacksEditor | null,
   onUpdate: (content: string) => void
 ): EditorPlugin => {
   return () => {
@@ -39,9 +41,14 @@ export const createOnChangePlugin = (
     const proseMirrorPlugin: any = new Plugin({
       view() {
         return {
-          update(view) {
+          update() {
             try {
-              const content = view.state.doc.textContent;
+              // Get the editor instance to access serialized markdown content
+              const editor = getEditor();
+              if (!editor) return;
+
+              // Use editor.content to get properly serialized markdown
+              const content = editor.content;
 
               // Only trigger callback if content actually changed
               if (content !== lastContent) {
