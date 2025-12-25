@@ -17,17 +17,16 @@
  * under the License.
  */
 
-import Component from './Component';
-import i18nConfig from './i18n';
-import info from './info.yaml';
+import Component from "./Component";
+import i18nConfig from "./i18n";
+import info from "./info.yaml";
 
 export default {
   info: {
     type: info.type,
     slug_name: info.slug_name,
-    mode: info.mode,
+    registrationMode: info.registrationMode,
   },
   component: Component,
   i18nConfig,
 };
-
