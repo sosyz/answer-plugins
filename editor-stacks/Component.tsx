@@ -57,23 +57,35 @@ const Component: FC<EditorProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const editorInstanceRef = useRef<StacksEditor | null>(null);
   const isInitializedRef = useRef(false);
+  const onChangeRef = useRef(onChange);
+  const onFocusRef = useRef(onFocus);
+  const onBlurRef = useRef(onBlur);
+  const autoFocusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   // Version compatibility temporarily disabled
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+    onFocusRef.current = onFocus;
+    onBlurRef.current = onBlur;
+  });
 
   const syncTheme = useCallback(() => {
     if (!containerRef.current) return;
 
-    containerRef.current.parentElement?.classList.remove(
+    containerRef.current?.classList.remove(
       "theme-light",
       "theme-dark",
-      "theme-system",
+      "theme-system"
     );
     const themeAttr =
       document.documentElement.getAttribute("data-bs-theme") ||
       document.body.getAttribute("data-bs-theme");
 
     if (themeAttr) {
-      containerRef.current.parentElement?.classList.add(`theme-system`);
+      containerRef.current?.classList.add(`theme-${themeAttr}`);
     }
   }, []);
 
@@ -101,15 +113,10 @@ const Component: FC<EditorProps> = ({
       return;
     }
 
-    const container = document.createElement("div");
-    container.className = "stacks-editor-container";
-    container.style.minHeight = "320px";
-    containerRef.current.appendChild(container);
-
     let editorInstance: StacksEditor | null = null;
 
     try {
-      editorInstance = new StacksEditor(container, value || "", {
+      editorInstance = new StacksEditor(containerRef.current, value || "", {
         placeholderText: placeholder || t("placeholder", ""),
         parserFeatures: {
           tables: true,
@@ -139,23 +146,24 @@ const Component: FC<EditorProps> = ({
             editor.editorView.updateState(newState);
           }
 
-          if (tr.docChanged && onChange) {
+          if (tr.docChanged && onChangeRef.current) {
             const newContent = editor.content;
-            onChange(newContent);
+            onChangeRef.current(newContent);
           }
         },
       });
 
       const editorElement = editor.dom as HTMLElement;
+      const handleFocus = () => onFocusRef.current?.();
+      const handleBlur = () => onBlurRef.current?.();
+
       if (editorElement) {
-        const handleFocus = () => onFocus?.();
-        const handleBlur = () => onBlur?.();
         editorElement.addEventListener("focus", handleFocus, true);
         editorElement.addEventListener("blur", handleBlur, true);
       }
 
       if (autoFocus) {
-        setTimeout(() => {
+        autoFocusTimeoutRef.current = setTimeout(() => {
           if (editor) {
             editor.focus();
           }
@@ -163,6 +171,16 @@ const Component: FC<EditorProps> = ({
       }
 
       return () => {
+        if (autoFocusTimeoutRef.current) {
+          clearTimeout(autoFocusTimeoutRef.current);
+          autoFocusTimeoutRef.current = null;
+        }
+
+        if (editorElement) {
+          editorElement.removeEventListener("focus", handleFocus, true);
+          editorElement.removeEventListener("blur", handleBlur, true);
+        }
+
         if (editorInstance) {
           try {
             editorInstance.destroy();
@@ -174,9 +192,7 @@ const Component: FC<EditorProps> = ({
         editorInstanceRef.current = null;
         isInitializedRef.current = false;
 
-        try {
-          container.remove();
-        } catch {}
+        containerRef.current!.innerHTML = "";
       };
     } catch (error) {
       console.error("Failed to initialize Stacks Editor:", error);
@@ -200,9 +216,10 @@ const Component: FC<EditorProps> = ({
   }, [value]);
 
   return (
-    <div className="editor-stacks-wrapper editor-stacks-scope">
-      <div ref={containerRef} style={{ minHeight: 320 }} />
-    </div>
+    <div
+      className="editor-stacks-wrapper editor-stacks-scope"
+      ref={containerRef}
+    />
   );
 };
 
