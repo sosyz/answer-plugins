@@ -17,15 +17,16 @@
  * under the License.
  */
 
-import { FC, useCallback, useEffect, useRef } from "react";
-import { useTranslation } from "react-i18next";
+import { FC, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { StacksEditor } from "@stackoverflow/stacks-editor";
+import { StacksEditor } from '@stackoverflow/stacks-editor';
 
-import "@stackoverflow/stacks";
-import "@stackoverflow/stacks/dist/css/stacks.css";
+import '@stackoverflow/stacks';
+import '@stackoverflow/stacks/dist/css/stacks.css';
 
-import "@stackoverflow/stacks-editor/dist/styles.css";
+import '@stackoverflow/stacks-editor/dist/styles.css';
+import { createOnChangePlugin } from './onChange-plugin';
 
 export interface EditorProps {
   value: string;
@@ -46,13 +47,13 @@ const Component: FC<EditorProps> = ({
   onChange,
   onFocus,
   onBlur,
-  placeholder = "",
+  placeholder = '',
   autoFocus = false,
   imageUploadHandler,
   uploadConfig,
 }) => {
-  const { t } = useTranslation("plugin", {
-    keyPrefix: "editor_stacks.frontend",
+  const { t } = useTranslation('plugin', {
+    keyPrefix: 'editor_stacks.frontend',
   });
   const containerRef = useRef<HTMLDivElement>(null);
   const editorInstanceRef = useRef<StacksEditor | null>(null);
@@ -61,7 +62,7 @@ const Component: FC<EditorProps> = ({
   const onFocusRef = useRef(onFocus);
   const onBlurRef = useRef(onBlur);
   const autoFocusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
+    null,
   );
 
   // Version compatibility temporarily disabled
@@ -76,13 +77,13 @@ const Component: FC<EditorProps> = ({
     if (!containerRef.current) return;
 
     containerRef.current?.classList.remove(
-      "theme-light",
-      "theme-dark",
-      "theme-system"
+      'theme-light',
+      'theme-dark',
+      'theme-system',
     );
     const themeAttr =
-      document.documentElement.getAttribute("data-bs-theme") ||
-      document.body.getAttribute("data-bs-theme");
+      document.documentElement.getAttribute('data-bs-theme') ||
+      document.body.getAttribute('data-bs-theme');
 
     if (themeAttr) {
       containerRef.current?.classList.add(`theme-${themeAttr}`);
@@ -99,11 +100,11 @@ const Component: FC<EditorProps> = ({
     });
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ["data-bs-theme", "class"],
+      attributeFilter: ['data-bs-theme', 'class'],
     });
     observer.observe(document.body, {
       attributes: true,
-      attributeFilter: ["data-bs-theme", "class"],
+      attributeFilter: ['data-bs-theme', 'class'],
     });
     return () => observer.disconnect();
   }, [syncTheme]);
@@ -116,8 +117,8 @@ const Component: FC<EditorProps> = ({
     let editorInstance: StacksEditor | null = null;
 
     try {
-      editorInstance = new StacksEditor(containerRef.current, value || "", {
-        placeholderText: placeholder || t("placeholder", ""),
+      editorInstance = new StacksEditor(containerRef.current, value || '', {
+        placeholderText: placeholder || t('placeholder', ''),
         parserFeatures: {
           tables: true,
           html: false,
@@ -129,37 +130,26 @@ const Component: FC<EditorProps> = ({
               acceptedFileTypes: uploadConfig?.allowedExtensions,
             }
           : undefined,
+        editorPlugins: onChange
+          ? [
+              createOnChangePlugin((content) => {
+                onChangeRef.current?.(content);
+              }),
+            ]
+          : [],
       });
 
       editorInstanceRef.current = editorInstance;
       isInitializedRef.current = true;
 
       const editor = editorInstance;
-
-      const originalDispatch = editor.editorView.props.dispatchTransaction;
-      editor.editorView.setProps({
-        dispatchTransaction: (tr) => {
-          if (originalDispatch) {
-            originalDispatch.call(editor.editorView, tr);
-          } else {
-            const newState = editor.editorView.state.apply(tr);
-            editor.editorView.updateState(newState);
-          }
-
-          if (tr.docChanged && onChangeRef.current) {
-            const newContent = editor.content;
-            onChangeRef.current(newContent);
-          }
-        },
-      });
-
       const editorElement = editor.dom as HTMLElement;
       const handleFocus = () => onFocusRef.current?.();
       const handleBlur = () => onBlurRef.current?.();
 
       if (editorElement) {
-        editorElement.addEventListener("focus", handleFocus, true);
-        editorElement.addEventListener("blur", handleBlur, true);
+        editorElement.addEventListener('focus', handleFocus, true);
+        editorElement.addEventListener('blur', handleBlur, true);
       }
 
       if (autoFocus) {
@@ -177,25 +167,27 @@ const Component: FC<EditorProps> = ({
         }
 
         if (editorElement) {
-          editorElement.removeEventListener("focus", handleFocus, true);
-          editorElement.removeEventListener("blur", handleBlur, true);
+          editorElement.removeEventListener('focus', handleFocus, true);
+          editorElement.removeEventListener('blur', handleBlur, true);
         }
 
         if (editorInstance) {
           try {
             editorInstance.destroy();
           } catch (e) {
-            console.error("Error destroying editor:", e);
+            console.error('Error destroying editor:', e);
           }
         }
 
         editorInstanceRef.current = null;
         isInitializedRef.current = false;
 
-        containerRef.current!.innerHTML = "";
+        if (containerRef.current) {
+          containerRef.current.innerHTML = '';
+        }
       };
     } catch (error) {
-      console.error("Failed to initialize Stacks Editor:", error);
+      console.error('Failed to initialize Stacks Editor:', error);
       isInitializedRef.current = false;
     }
   }, []);
@@ -211,7 +203,7 @@ const Component: FC<EditorProps> = ({
         editor.content = value;
       }
     } catch (error) {
-      console.error("Error syncing editor content:", error);
+      console.error('Error syncing editor content:', error);
     }
   }, [value]);
 
