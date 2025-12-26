@@ -25,7 +25,6 @@ export default {
   info: {
     type: info.type,
     slug_name: info.slug_name,
-    registrationMode: info.registrationMode,
   },
   component: Component,
   i18nConfig,
