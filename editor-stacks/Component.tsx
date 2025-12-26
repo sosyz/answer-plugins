@@ -130,6 +130,7 @@ const Component: FC<EditorProps> = ({
               acceptedFileTypes: uploadConfig?.allowedExtensions,
             }
           : undefined,
+        editorHelpLink: 'https://stackoverflow.com/editing-help',
         editorPlugins: onChange
           ? [
               createOnChangePlugin(
