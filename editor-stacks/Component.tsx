@@ -117,6 +117,37 @@ const Component: FC<EditorProps> = ({
     let editorInstance: StacksEditor | null = null;
 
     try {
+      // Convert file extensions to MIME types for editor-stacks validation
+      const extensionToMimeType = (ext: string): string => {
+        const extension = ext.toLowerCase().replace(/^\./, '');
+        const mimeTypeMap: Record<string, string> = {
+          jpg: 'image/jpeg',
+          jpeg: 'image/jpeg',
+          png: 'image/png',
+          gif: 'image/gif',
+          webp: 'image/webp',
+          svg: 'image/svg+xml',
+          bmp: 'image/bmp',
+          ico: 'image/x-icon',
+          pdf: 'application/pdf',
+          doc: 'application/msword',
+          docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          xls: 'application/vnd.ms-excel',
+          xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          ppt: 'application/vnd.ms-powerpoint',
+          pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+          zip: 'application/zip',
+          rar: 'application/x-rar-compressed',
+          txt: 'text/plain',
+          csv: 'text/csv',
+        };
+        return mimeTypeMap[extension] || ext;
+      };
+
+      const allowedFileTypes = uploadConfig?.allowedExtensions
+        ? uploadConfig.allowedExtensions.map(extensionToMimeType)
+        : undefined;
+
       editorInstance = new StacksEditor(containerRef.current, value || '', {
         placeholderText: placeholder || t('placeholder', ''),
         parserFeatures: {
@@ -127,7 +158,7 @@ const Component: FC<EditorProps> = ({
           ? {
               handler: imageUploadHandler,
               sizeLimitMib: uploadConfig?.maxImageSizeMiB,
-              acceptedFileTypes: uploadConfig?.allowedExtensions,
+              acceptedFileTypes: allowedFileTypes,
             }
           : undefined,
         editorHelpLink: 'https://stackoverflow.com/editing-help',
@@ -212,10 +243,22 @@ const Component: FC<EditorProps> = ({
   }, [value]);
 
   return (
-    <div
-      className="editor-stacks-wrapper editor-stacks-scope"
-      ref={containerRef}
-    />
+    <>
+      <style>{`
+        /* Hide specific menu buttons */
+        .editor-stacks-wrapper [data-key="tag-btn"],
+        .editor-stacks-wrapper [data-key="meta-tag-btn"],
+        .editor-stacks-wrapper [data-key="spoiler-btn"],
+        .editor-stacks-wrapper [data-key="subscript-btn"],
+        .editor-stacks-wrapper [data-key="superscript-btn"] {
+          display: none !important;
+        }
+      `}</style>
+      <div
+        className="editor-stacks-wrapper editor-stacks-scope"
+        ref={containerRef}
+      />
+    </>
   );
 };
 
