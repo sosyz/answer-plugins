@@ -31,7 +31,7 @@ interface SidebarConfigData {
   links_text?: string;
 }
 
-interface ComponentProps {
+interface IProps {
   navigate: (url: string) => void;
   request: {
     instance: {
@@ -41,7 +41,7 @@ interface ComponentProps {
   hasDivider?: boolean;
 }
 
-const Component = ({ navigate, request, hasDivider }: ComponentProps) => {
+const Component = ({ navigate, request, hasDivider }: IProps) => {
 
   const { t } = useTranslation('plugin', {
     keyPrefix: 'quick_links.frontend',
