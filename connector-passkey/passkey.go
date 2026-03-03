@@ -88,12 +88,6 @@ func (c *Connector) ConnectorReceiver(ctx *plugin.GinContext, receiverURL string
 
 	userInfo.ExternalID = tokenData.UserExternalID
 
-	// Look up stored email for automatic account binding
-	email, err := c.getUserEmail(ctx, tokenData.UserExternalID)
-	if err == nil && email != "" {
-		userInfo.Email = email
-	}
-
 	return userInfo, nil
 }
 

@@ -111,24 +111,10 @@ func (c *Connector) handleBeginRegister(ctx *gin.Context) {
 		return
 	}
 
-	// Store user email for account binding during passkey login
-	email := ctx.Query("email")
-	if email == "" {
-		email = ctx.GetHeader("X-User-Email")
-	}
-
 	sessionID, options, err := c.beginRegistration(ctx.Request.Context(), answerUserID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
-	}
-
-	// Store email associated with the user's external ID
-	if email != "" {
-		externalID, err := c.getOrCreateExternalID(ctx.Request.Context(), answerUserID)
-		if err == nil {
-			_ = c.storeUserEmail(ctx.Request.Context(), externalID, email)
-		}
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
