@@ -1,20 +1,18 @@
 {
-  "name": "connector-wallet",
-  "version": "1.0.2",
-  "description": "Connect to Web3 wallet for third-party login",
-  "author": "Ourai L. <ourairyu@gmail.com>",
+  "name": "connector-passkey-v2",
+  "version": "1.0.0",
+  "description": "Passkey (WebAuthn) connector for Apache Answer",
   "type": "module",
   "files": [
-    "dist",
-    "README.md"
+    "dist"
   ],
-  "main": "./dist/connector-wallet.umd.js",
-  "module": "./dist/connector-wallet.es.js",
-  "types": "./dist/connector-wallet.d.ts",
+  "main": "./dist/connector-passkey-v2.umd.js",
+  "module": "./dist/connector-passkey-v2.es.js",
+  "types": "./dist/connector-passkey-v2.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/connector-wallet.es.js",
-      "require": "./dist/connector-wallet.umd.js"
+      "import": "./dist/connector-passkey-v2.es.js",
+      "require": "./dist/connector-passkey-v2.umd.js"
     }
   },
   "scripts": {
@@ -24,7 +22,6 @@
   },
   "peerDependencies": {
     "@types/react": "^18.0.17",
-    "js-sha256": "0.11.0",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.0",
     "react-dom": "^18.2.0",
@@ -37,6 +34,8 @@
   },
   "devDependencies": {
     "@modyfi/vite-plugin-yaml": "^1.1.0",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react-swc": "^3.3.2",
@@ -49,9 +48,6 @@
     "vite-plugin-dts": "^3.9.1"
   },
   "dependencies": {
-    "@rainbow-me/rainbowkit": "^2.2.0",
-    "@tanstack/react-query": "^5.59.15",
-    "viem": "2.x",
-    "wagmi": "^2.12.19"
+    "@simplewebauthn/browser": "^10.0.0"
   }
 }
