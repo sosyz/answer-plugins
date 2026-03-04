@@ -22,9 +22,11 @@ package passkey
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
+	"regexp"
 	"strings"
 
-	"github.com/apache/answer-plugins/connector-passkey-v2/i18n"
+	"github.com/apache/answer-plugins/connector-passkey/i18n"
 	"github.com/apache/answer/plugin"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
@@ -99,13 +101,46 @@ func (c *Connector) ConfigReceiver(config []byte) error {
 		cfg.AttestationType = "none"
 	}
 
-	c.Config = cfg
-
-	if cfg.RPName == "" || cfg.RPID == "" || cfg.RPOrigins == "" {
-		return nil
+	// Validate all required fields
+	if cfg.RPName == "" {
+		return fmt.Errorf("RP Name is required")
+	}
+	if cfg.RPID == "" {
+		return fmt.Errorf("RP ID is required")
+	}
+	if cfg.RPOrigins == "" {
+		return fmt.Errorf("at least one origin is required")
 	}
 
+	// Validate RP Name length
+	if len(cfg.RPName) > 255 {
+		return fmt.Errorf("RP Name must be 255 characters or less")
+	}
+
+	// Validate RPID format (must be a valid domain)
+	if err := validateRPID(cfg.RPID); err != nil {
+		return fmt.Errorf("invalid RP ID: %w", err)
+	}
+
+	// Parse and validate origins
 	origins := parseOrigins(cfg.RPOrigins)
+	if len(origins) == 0 {
+		return fmt.Errorf("no valid origins provided")
+	}
+	for _, origin := range origins {
+		if err := validateOrigin(origin); err != nil {
+			return fmt.Errorf("invalid origin %q: %w", origin, err)
+		}
+	}
+
+	// Validate attestation type
+	validAttestations := map[string]bool{"none": true, "indirect": true, "direct": true}
+	if !validAttestations[cfg.AttestationType] {
+		return fmt.Errorf("invalid attestation type: must be 'none', 'indirect', or 'direct'")
+	}
+
+	c.Config = cfg
+
 	attestation := protocol.ConveyancePreference(cfg.AttestationType)
 
 	wconfig := &webauthn.Config{
@@ -128,6 +163,43 @@ func (c *Connector) ConfigReceiver(config []byte) error {
 	c.mu.Lock()
 	c.WebAuthn = w
 	c.mu.Unlock()
+
+	return nil
+}
+
+// validateRPID validates that the RPID is a valid domain name
+func validateRPID(rpid string) error {
+	if len(rpid) == 0 || len(rpid) > 253 {
+		return fmt.Errorf("RPID must be between 1 and 253 characters")
+	}
+
+	// Basic domain validation regex
+	domainRegex := regexp.MustCompile(`^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$`)
+	if !domainRegex.MatchString(rpid) {
+		return fmt.Errorf("RPID must be a valid domain name")
+	}
+
+	return nil
+}
+
+// validateOrigin validates that an origin is a valid URL with http or https scheme
+func validateOrigin(origin string) error {
+	if len(origin) > 2048 {
+		return fmt.Errorf("origin URL must be 2048 characters or less")
+	}
+
+	u, err := url.Parse(origin)
+	if err != nil {
+		return fmt.Errorf("invalid URL format: %w", err)
+	}
+
+	if u.Scheme != "https" && u.Scheme != "http" {
+		return fmt.Errorf("origin must use http or https scheme")
+	}
+
+	if u.Host == "" {
+		return fmt.Errorf("origin must include a hostname")
+	}
 
 	return nil
 }

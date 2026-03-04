@@ -27,6 +27,7 @@ import (
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
+	"github.com/segmentfault/pacman/log"
 )
 
 const (
@@ -220,7 +221,9 @@ func (c *Connector) finishLogin(ctx context.Context, sessionID string, response 
 	}
 
 	// Update sign count and last-used
-	_ = c.updateCredentialUsage(ctx, userExternalID, credential.ID, credential.Authenticator.SignCount)
+	if err := c.updateCredentialUsage(ctx, userExternalID, credential.ID, credential.Authenticator.SignCount); err != nil {
+		log.Warnf("failed to update credential usage for user %s: %v", userExternalID, err)
+	}
 
 	// Create a one-time login token
 	token, err := c.createToken(ctx, userExternalID)

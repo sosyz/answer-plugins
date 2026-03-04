@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/apache/answer-plugins/connector-passkey-v2/i18n"
+	"github.com/apache/answer-plugins/connector-passkey/i18n"
 	"github.com/apache/answer-plugins/util"
 	"github.com/apache/answer/plugin"
 	"github.com/go-webauthn/webauthn/webauthn"

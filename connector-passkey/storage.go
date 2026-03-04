@@ -28,6 +28,7 @@ import (
 
 	"github.com/apache/answer/plugin"
 	"github.com/google/uuid"
+	"github.com/segmentfault/pacman/log"
 )
 
 const (
@@ -272,7 +273,9 @@ func (c *Connector) consumeSession(ctx context.Context, sessionID string, expect
 	}
 
 	// Delete immediately (single-use)
-	_ = c.kvOperator.Del(ctx, plugin.KVParams{Group: groupSession, Key: sessionID})
+	if err := c.kvOperator.Del(ctx, plugin.KVParams{Group: groupSession, Key: sessionID}); err != nil {
+		log.Warnf("failed to delete consumed session %s: %v", sessionID, err)
+	}
 
 	var sd SessionData
 	if err := json.Unmarshal([]byte(raw), &sd); err != nil {
@@ -316,7 +319,9 @@ func (c *Connector) consumeToken(ctx context.Context, token string) (*TokenData,
 	}
 
 	// Delete immediately (single-use)
-	_ = c.kvOperator.Del(ctx, plugin.KVParams{Group: groupToken, Key: token})
+	if err := c.kvOperator.Del(ctx, plugin.KVParams{Group: groupToken, Key: token}); err != nil {
+		log.Warnf("failed to delete consumed token %s: %v", token, err)
+	}
 
 	var td TokenData
 	if err := json.Unmarshal([]byte(raw), &td); err != nil {
