@@ -21,6 +21,7 @@ package passkey
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -168,7 +169,7 @@ func (c *Connector) saveCredentials(ctx context.Context, userExternalID string, 
 
 		// Update reverse index for all credentials
 		for _, cred := range creds {
-			credIDKey := encodeBase64URL(cred.ID)
+			credIDKey := base64.RawURLEncoding.EncodeToString(cred.ID)
 			if err := txKv.Set(ctx, plugin.KVParams{Group: groupCredIndex, Key: credIDKey, Value: userExternalID}); err != nil {
 				return err
 			}
@@ -194,10 +195,10 @@ func (c *Connector) deleteCredential(ctx context.Context, userExternalID string,
 		return err
 	}
 
-	credIDKey := encodeBase64URL(credentialID)
+	credIDKey := base64.RawURLEncoding.EncodeToString(credentialID)
 	filtered := make([]StoredCredential, 0, len(existing))
 	for _, cred := range existing {
-		if encodeBase64URL(cred.ID) != credIDKey {
+		if base64.RawURLEncoding.EncodeToString(cred.ID) != credIDKey {
 			filtered = append(filtered, cred)
 		}
 	}
@@ -222,9 +223,9 @@ func (c *Connector) updateCredentialUsage(ctx context.Context, userExternalID st
 		return err
 	}
 
-	credIDKey := encodeBase64URL(credentialID)
+	credIDKey := base64.RawURLEncoding.EncodeToString(credentialID)
 	for idx := range existing {
-		if encodeBase64URL(existing[idx].ID) == credIDKey {
+		if base64.RawURLEncoding.EncodeToString(existing[idx].ID) == credIDKey {
 			existing[idx].LastUsedAt = time.Now()
 			existing[idx].Authenticator.SignCount = signCount
 			break
@@ -240,7 +241,7 @@ func (c *Connector) updateCredentialUsage(ctx context.Context, userExternalID st
 
 // lookupUserByCredentialID finds the user external ID that owns a given credential.
 func (c *Connector) lookupUserByCredentialID(ctx context.Context, credentialID []byte) (string, error) {
-	credIDKey := encodeBase64URL(credentialID)
+	credIDKey := base64.RawURLEncoding.EncodeToString(credentialID)
 	return c.kvOperator.Get(ctx, plugin.KVParams{Group: groupCredIndex, Key: credIDKey})
 }
 
@@ -329,27 +330,4 @@ func (c *Connector) consumeToken(ctx context.Context, token string) (*TokenData,
 	return &td, nil
 }
 
-// encodeBase64URL encodes bytes to base64url without padding.
-func encodeBase64URL(data []byte) string {
-	const encodeURL = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
-	buf := make([]byte, 0, (len(data)*4+2)/3)
-	for i := 0; i < len(data); i += 3 {
-		val := uint(data[i]) << 16
-		if i+1 < len(data) {
-			val |= uint(data[i+1]) << 8
-		}
-		if i+2 < len(data) {
-			val |= uint(data[i+2])
-		}
 
-		buf = append(buf, encodeURL[(val>>18)&0x3F])
-		buf = append(buf, encodeURL[(val>>12)&0x3F])
-		if i+1 < len(data) {
-			buf = append(buf, encodeURL[(val>>6)&0x3F])
-		}
-		if i+2 < len(data) {
-			buf = append(buf, encodeURL[val&0x3F])
-		}
-	}
-	return string(buf)
-}
