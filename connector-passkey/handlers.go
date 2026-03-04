@@ -23,17 +23,67 @@ import (
 	"encoding/base64"
 	"net/http"
 	"reflect"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
+	"github.com/segmentfault/pacman/log"
 )
 
+// sanitizeError sanitizes error messages for user-facing responses
+// to avoid exposing internal implementation details
+func sanitizeError(err error, defaultMsg string) string {
+	if err == nil {
+		return defaultMsg
+	}
+
+	log.Errorf("passkey error: %v", err)
+
+	errMsg := err.Error()
+	// Check for common error patterns and provide user-friendly messages
+	if strings.Contains(errMsg, "session not found") || strings.Contains(errMsg, "session expired") {
+		return "authentication session expired, please try again"
+	}
+	if strings.Contains(errMsg, "token not found") || strings.Contains(errMsg, "token expired") {
+		return "authentication token expired, please try again"
+	}
+	if strings.Contains(errMsg, "WebAuthn not configured") {
+		return "passkey authentication is not properly configured"
+	}
+	if strings.Contains(errMsg, "failed to begin") {
+		return "failed to start passkey authentication"
+	}
+	if strings.Contains(errMsg, "failed to validate") || strings.Contains(errMsg, "failed to create credential") {
+		return "passkey authentication failed, please try again"
+	}
+	if strings.Contains(errMsg, "user not found") || strings.Contains(errMsg, "no credentials found") {
+		return "no passkey registered for this account"
+	}
+
+	// Default safe error message
+	return defaultMsg
+}
+
 // getUserIDFromContext extracts the Answer user ID from Gin context.
+//
+// IMPORTANT: This function uses reflection to access internal Answer framework structures.
 // The auth middleware stores user info at context key "ctxUuidKey" as *entity.UserCacheInfo.
-// We use reflection because plugins cannot import internal packages.
+// We use reflection because plugins cannot import internal Answer packages.
+//
+// FRAGILITY WARNING: This implementation is fragile and will break if:
+// 1. The context key name changes from "ctxUuidKey"
+// 2. The UserCacheInfo struct is renamed or modified
+// 3. The UserID field is renamed or removed
+//
+// If this breaks, authenticated users will receive "not authenticated" errors
+// when trying to register passkeys. Login will still work.
+//
+// TODO: Request Answer framework to provide a public API for user ID extraction
+// to avoid reflection-based access to internal structures.
 func getUserIDFromContext(ctx *gin.Context) string {
 	val, exists := ctx.Get("ctxUuidKey")
 	if !exists || val == nil {
+		log.Debugf("getUserIDFromContext: context key 'ctxUuidKey' not found")
 		return ""
 	}
 	v := reflect.ValueOf(val)
@@ -41,10 +91,12 @@ func getUserIDFromContext(ctx *gin.Context) string {
 		v = v.Elem()
 	}
 	if v.Kind() != reflect.Struct {
+		log.Warnf("getUserIDFromContext: expected struct, got %v", v.Kind())
 		return ""
 	}
 	f := v.FieldByName("UserID")
 	if !f.IsValid() {
+		log.Errorf("getUserIDFromContext: UserID field not found in context value - Answer framework structure may have changed")
 		return ""
 	}
 	return f.String()
@@ -55,7 +107,7 @@ func getUserIDFromContext(ctx *gin.Context) string {
 func (c *Connector) handleBeginLogin(ctx *gin.Context) {
 	sessionID, options, err := c.beginLogin(ctx.Request.Context())
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": sanitizeError(err, "failed to start passkey login")})
 		return
 	}
 
@@ -87,13 +139,14 @@ func (c *Connector) handleFinishLogin(ctx *gin.Context) {
 	// Parse the WebAuthn response from the request body
 	parsedResponse, err := protocol.ParseCredentialRequestResponseBody(ctx.Request.Body)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "failed to parse credential response: " + err.Error()})
+		log.Errorf("failed to parse credential request response: %v", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid passkey response"})
 		return
 	}
 
 	token, err := c.finishLogin(ctx.Request.Context(), sessionID, parsedResponse)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": sanitizeError(err, "passkey authentication failed")})
 		return
 	}
 
@@ -113,7 +166,7 @@ func (c *Connector) handleBeginRegister(ctx *gin.Context) {
 
 	sessionID, options, err := c.beginRegistration(ctx.Request.Context(), answerUserID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": sanitizeError(err, "failed to start passkey registration")})
 		return
 	}
 
@@ -156,13 +209,14 @@ func (c *Connector) handleFinishRegister(ctx *gin.Context) {
 
 	parsedResponse, err := protocol.ParseCredentialCreationResponseBody(ctx.Request.Body)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "failed to parse credential response: " + err.Error()})
+		log.Errorf("failed to parse credential creation response: %v", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid passkey response"})
 		return
 	}
 
 	err = c.finishRegistration(ctx.Request.Context(), sessionID, name, parsedResponse)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": sanitizeError(err, "failed to register passkey")})
 		return
 	}
 
@@ -190,13 +244,13 @@ func (c *Connector) handleListCredentials(ctx *gin.Context) {
 
 	externalID, err := c.getOrCreateExternalID(ctx.Request.Context(), answerUserID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": sanitizeError(err, "failed to retrieve passkey list")})
 		return
 	}
 
 	creds, err := c.getCredentials(ctx.Request.Context(), externalID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": sanitizeError(err, "failed to retrieve passkey list")})
 		return
 	}
 
@@ -237,13 +291,13 @@ func (c *Connector) handleDeleteCredential(ctx *gin.Context) {
 
 	externalID, err := c.getOrCreateExternalID(ctx.Request.Context(), answerUserID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": sanitizeError(err, "failed to delete passkey")})
 		return
 	}
 
 	err = c.deleteCredential(ctx.Request.Context(), externalID, credID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": sanitizeError(err, "failed to delete passkey")})
 		return
 	}
 
