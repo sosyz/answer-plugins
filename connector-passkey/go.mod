@@ -1,4 +1,4 @@
-module github.com/apache/answer-plugins/connector-passkey-v2
+module github.com/apache/answer-plugins/connector-passkey
 
 go 1.23.0
 

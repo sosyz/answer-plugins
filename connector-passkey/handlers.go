@@ -148,6 +148,12 @@ func (c *Connector) handleFinishRegister(ctx *gin.Context) {
 		name = "My Passkey"
 	}
 
+	// Validate passkey name length
+	if len(name) > 255 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "passkey name must be 255 characters or less"})
+		return
+	}
+
 	parsedResponse, err := protocol.ParseCredentialCreationResponseBody(ctx.Request.Body)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "failed to parse credential response: " + err.Error()})

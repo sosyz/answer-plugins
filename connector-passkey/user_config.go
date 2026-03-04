@@ -20,7 +20,7 @@
 package passkey
 
 import (
-	"github.com/apache/answer-plugins/connector-passkey-v2/i18n"
+	"github.com/apache/answer-plugins/connector-passkey/i18n"
 	"github.com/apache/answer/plugin"
 )
 
