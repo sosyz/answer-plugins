@@ -102,7 +102,11 @@ func (g *Connector) ConnectorSender(ctx *plugin.GinContext, receiverURL string) 
 			"openid",
 		},
 	}
-	return oauth2Config.AuthCodeURL("state")
+	state := ctx.Query("state")
+	if len(state) == 0 {
+		state = "state"
+	}
+	return oauth2Config.AuthCodeURL(state)
 }
 
 func (g *Connector) ConnectorReceiver(ctx *plugin.GinContext, receiverURL string) (userInfo plugin.ExternalLoginUserInfo, err error) {

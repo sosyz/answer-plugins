@@ -87,7 +87,11 @@ func (g *Connector) ConnectorSender(ctx *plugin.GinContext, receiverURL string) 
 		RedirectURL:  receiverURL,
 		Scopes:       []string{"user:email"},
 	}
-	return oauth2Config.AuthCodeURL("state")
+	state := ctx.Query("state")
+	if len(state) == 0 {
+		state = "state"
+	}
+	return oauth2Config.AuthCodeURL(state)
 }
 
 func (g *Connector) ConnectorReceiver(ctx *plugin.GinContext, receiverURL string) (userInfo plugin.ExternalLoginUserInfo, err error) {
@@ -142,7 +146,7 @@ func (g *Connector) guaranteeEmail(email string, accessToken string) string {
 		return ""
 	}
 	for _, e := range emails {
-		if e.GetPrimary() {
+		if e.GetPrimary() && e.GetVerified() {
 			return e.GetEmail()
 		}
 	}

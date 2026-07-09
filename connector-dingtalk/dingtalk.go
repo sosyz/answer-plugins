@@ -101,8 +101,12 @@ func (g *Connector) ConnectorSlugName() string {
 }
 
 func (g *Connector) ConnectorSender(ctx *plugin.GinContext, receiverURL string) (redirectURL string) {
-	return fmt.Sprintf("%s?redirect_uri=%s&response_type=code&client_id=%s&scope=Contact.User.Read&state=state&prompt=consent",
-		AuthorizeURL, receiverURL, g.Config.ClientID)
+	state := ctx.Query("state")
+	if len(state) == 0 {
+		state = "state"
+	}
+	return fmt.Sprintf("%s?redirect_uri=%s&response_type=code&client_id=%s&scope=Contact.User.Read&state=%s&prompt=consent",
+		AuthorizeURL, receiverURL, g.Config.ClientID, state)
 }
 
 func (g *Connector) ConnectorReceiver(ctx *plugin.GinContext, receiverURL string) (userInfo plugin.ExternalLoginUserInfo, err error) {
