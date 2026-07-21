@@ -70,7 +70,10 @@ func (g *Connector) ConnectorSlugName() string {
 }
 
 func (g *Connector) ConnectorSender(ctx *plugin.GinContext, receiverURL string) (redirectURL string) {
-	state := token.GenerateToken()
+	state := ctx.Query("state")
+	if len(state) == 0 {
+		state = token.GenerateToken()
+	}
 	return fmt.Sprintf("https://oauth.apache.org/auth?state=%s&redirect_uri=%s", state, receiverURL)
 }
 

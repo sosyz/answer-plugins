@@ -84,7 +84,7 @@ func randomString(length int) (ret string) {
 
 func init() {
 	plugin.Register(&Connector{
-		Config: &ConnectorConfig{},
+		Config: &ConnectorConfig{CheckEmailVerified: true},
 	})
 }
 
@@ -128,7 +128,10 @@ func (g *Connector) ConnectorSender(ctx *plugin.GinContext, receiverURL string) 
 		RedirectURL: receiverURL,
 		Scopes:      strings.Split(g.Config.Scope, ","),
 	}
-	state := randomString(24)
+	state := ctx.Query("state")
+	if len(state) == 0 {
+		state = randomString(24)
+	}
 	return oauth2Config.AuthCodeURL(state)
 }
 
@@ -183,10 +186,14 @@ func (g *Connector) ConnectorReceiver(ctx *plugin.GinContext, receiverURL string
 	if len(g.Config.UserEmailJsonPath) > 0 {
 		userInfo.Email = gjson.GetBytes(data, g.Config.UserEmailJsonPath).String()
 	}
-	if g.Config.CheckEmailVerified && len(g.Config.EmailVerifiedJsonPath) > 0 {
-		emailVerified := gjson.GetBytes(data, g.Config.EmailVerifiedJsonPath).Bool()
-		if !emailVerified {
+	if g.Config.CheckEmailVerified {
+		if len(g.Config.EmailVerifiedJsonPath) == 0 {
 			userInfo.Email = ""
+		} else {
+			emailVerified := gjson.GetBytes(data, g.Config.EmailVerifiedJsonPath).Bool()
+			if !emailVerified {
+				userInfo.Email = ""
+			}
 		}
 	}
 	if len(g.Config.UserAvatarJsonPath) > 0 {
@@ -273,6 +280,11 @@ func createTextInput(name, title, desc, value string, require bool) plugin.Confi
 func (g *Connector) ConfigReceiver(config []byte) error {
 	c := &ConnectorConfig{}
 	_ = json.Unmarshal(config, c)
+	conf := map[string]any{}
+	_ = json.Unmarshal(config, &conf)
+	if _, ok := conf["check_email_verified"]; !ok {
+		c.CheckEmailVerified = true
+	}
 	g.Config = c
 	return nil
 }

@@ -62,8 +62,10 @@ function WalletAuthorizer() {
         const handleAuthorize = async () => {
           const nonce = getSearchParamValue('nonce', sha256(address));
           const signature = await signMessageAsync({ message: nonce });
+          const state = getSearchParamValue('state');
+          const stateParam = state ? `&state=${encodeURIComponent(state)}` : '';
 
-          location.href = `/answer/api/v1/connector/redirect/wallet?message=${nonce}&signature=${signature}&address=${address}&redirect=${getSearchParamValue('redirect')}`;
+          location.href = `/answer/api/v1/connector/redirect/wallet?message=${nonce}&signature=${signature}&address=${address}&redirect=${getSearchParamValue('redirect')}${stateParam}`;
         }
 
         return (
