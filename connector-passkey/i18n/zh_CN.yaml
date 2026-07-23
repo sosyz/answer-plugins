@@ -1,0 +1,87 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+plugin:
+  passkey_connector:
+    backend:
+      name:
+        other: Passkey
+      info:
+        name:
+          other: Passkey 连接器
+        description:
+          other: 使用 Passkey（WebAuthn）启用无密码登录
+      config:
+        rp_name:
+          title:
+            other: 依赖方名称
+          description:
+            other: 在 Passkey 注册时显示的站点名称（例如 "My Answer Community"）
+        rp_id:
+          title:
+            other: 依赖方 ID
+          description:
+            other: 站点的域名（例如 "example.com"），必须与用户访问的域名一致。
+        rp_origins:
+          title:
+            other: 允许的来源
+          description:
+            other: 以逗号分隔的允许来源列表（例如 "https://example.com"），必须包含协议。
+        attestation:
+          title:
+            other: 认证类型
+          description:
+            other: 要求认证器提供的认证级别。
+          options:
+            none:
+              other: 无
+            indirect:
+              other: 间接
+            direct:
+              other: 直接
+      user_config:
+        manage_passkeys:
+          other: 管理 Passkey
+    frontend:
+      login_title: 使用 Passkey 登录
+      login_description: 使用指纹、面容或安全密钥登录。
+      login_button: 认证
+      login_error: "Passkey 认证失败：${ERROR}"
+      login_cancelled: 认证已取消。
+      manage_title: Passkey 管理
+      manage_description: 管理已注册的 Passkey，实现无密码登录。
+      add_passkey: 添加新 Passkey
+      passkey_name_label: Passkey 名称
+      passkey_name_placeholder: 例如 MacBook Touch ID
+      register_error: "Passkey 注册失败：${ERROR}"
+      register_success: Passkey 注册成功。
+      delete_confirm: 确定要删除此 Passkey 吗？
+      delete_success: Passkey 删除成功。
+      delete_error: "删除 Passkey 失败：${ERROR}"
+      no_passkeys: 您还没有注册任何 Passkey。
+      created: 创建时间
+      last_used: 上次使用
+      never_used: 从未使用
+      cancel: 取消
+      delete: 删除
+      save: 保存
+      loading: 加载中...
+      error_generic: 发生意外错误，请重试。
+      error_not_supported: 此浏览器不支持 Passkey。
+      test_passkey: 测试
+      test_success: Passkey 验证成功。
+      test_error: "Passkey 验证失败：${ERROR}"
