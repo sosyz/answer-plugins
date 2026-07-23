@@ -22,6 +22,7 @@ package wallet
 import (
 	"embed"
 	"fmt"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -81,6 +82,9 @@ func generateRandomString(length int) string {
 func (g *Connector) ConnectorSender(ctx *plugin.GinContext, receiverURL string) (redirectURL string) {
 	randomString := fmt.Sprintf("%d", time.Now().Unix()) + generateRandomString(8)
 	redirectURL = "/connector-wallet-auth" + "?nonce=" + randomString
+	if state := ctx.Query("state"); len(state) > 0 {
+		redirectURL += "&state=" + url.QueryEscape(state)
+	}
 	return redirectURL
 }
 
