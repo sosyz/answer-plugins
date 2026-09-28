@@ -1,0 +1,124 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+plugin:
+  passkey_connector:
+    backend:
+      name:
+        other: 通行密钥
+      info:
+        name:
+          other: 通行密钥连接器
+        description:
+          other: 使用通行密钥（WebAuthn / FIDO2）登录
+      config:
+        rp_name:
+          title:
+            other: 依赖方名称
+          description:
+            other: 创建通行密钥时浏览器或密码管理器显示的名称。留空则使用站点 URL 的主机名。
+        rp_id:
+          title:
+            other: 依赖方 ID
+          description:
+            other: 通行密钥绑定的域名，例如 example.com。留空则使用站点 URL 的主机名。修改后，所有已有的通行密钥都将无法使用。
+        rp_origins:
+          title:
+            other: 允许的来源
+          description:
+            other: 允许使用通行密钥的来源，以逗号分隔，例如 https://example.com。留空则使用站点 URL 的来源。每个来源都必须使用 https（仅 localhost 可使用 http），并且位于依赖方 ID 或其子域名下。
+      user_config:
+        manage_passkeys:
+          other: 管理通行密钥
+    frontend:
+      common:
+        loading: "加载中…"
+        back_to_login: "返回登录"
+      error:
+        bad_request: "请求无效，请刷新页面后重试。"
+        unauthorized: "请先登录。"
+        forbidden: "你的账号无法执行此操作。"
+        plugin_disabled: "本站已停用通行密钥登录。"
+        not_configured: "本站尚未配置通行密钥登录。"
+        state_required: "此链接不完整，请重新开始。"
+        state_unverified: "此登录链接并非由本站发起，请从登录页面重新开始登录。"
+        session_invalid: "请求已过期，请重试。"
+        verification_failed: "无法验证该通行密钥。"
+        clone_detected: "该通行密钥可能已被复制，已被拒绝。请删除后重新创建。"
+        credential_exists: "该通行密钥已注册。"
+        credential_limit: "通行密钥数量已达上限。"
+        credential_not_found: "未找到该通行密钥。"
+        invalid_name: "名称长度必须为 1 到 64 个字符。"
+        internal_error: "服务器出现错误，请重试。"
+        network: "无法连接到服务器，请检查网络后重试。"
+        unknown: "出现错误，请重试。"
+      webauthn:
+        not_supported: "此浏览器不支持通行密钥。"
+        cancelled: "通行密钥请求已取消或超时，或没有可用的通行密钥。"
+        already_registered: "此设备上已有你账号的通行密钥。"
+        security: "本站的通行密钥设置与当前网址不符，请联系站点管理员。"
+      login:
+        title: "使用通行密钥登录"
+        description: "使用指纹、面容、屏幕锁或安全密钥。"
+        autofill_label: "用户名"
+        autofill_placeholder: "选择通行密钥"
+        button: "使用通行密钥登录"
+        redirecting: "正在登录…"
+        no_passkey_hint: "还没有通行密钥？请先用其他方式登录，然后在账号设置中添加。"
+        missing_state: "此登录链接不完整，请从登录页重新开始。"
+      bind:
+        title: "关联通行密钥"
+        description: "将通行密钥关联到 {{name}}，之后即可用它登录。"
+        create_button: "创建新的通行密钥"
+        use_existing_button: "使用已有的通行密钥"
+        redirecting: "正在关联通行密钥…"
+        already_linked: "此账号已关联通行密钥。"
+        manage_link: "管理通行密钥"
+        new_name: "新的通行密钥将命名为“{{name}}”。"
+      manage:
+        title: "通行密钥"
+        description: "通行密钥让你可以使用指纹、面容、屏幕锁或安全密钥代替密码登录。"
+        add_button: "添加通行密钥"
+        name_label: "名称（可选）"
+        name_placeholder: "例如：MacBook 触控 ID"
+        not_linked: "你的通行密钥尚未关联到此账号，因此还不能用于登录。"
+        link_button: "关联通行密钥"
+        empty: "你还没有添加任何通行密钥。"
+        default_name: "通行密钥"
+        created: "创建于 {{date}}"
+        last_used: "上次使用 {{date}}"
+        never_used: "从未使用"
+        synced: "已同步"
+        rename: "重命名"
+        rename_named: "重命名通行密钥“{{name}}”"
+        rename_title: "重命名通行密钥"
+        save: "保存"
+        cancel: "取消"
+        delete: "删除"
+        delete_named: "删除通行密钥“{{name}}”"
+        delete_title: "删除通行密钥"
+        delete_confirm: "确定删除通行密钥“{{name}}”吗？删除后将无法再用它登录。"
+        delete_last_warning: "这是你的最后一个通行密钥。删除后将无法使用通行密钥登录，请确认你仍可通过其他方式（例如密码）登录。"
+        delete_last_linked: "你的账号已关联通行密钥，这是最后一个通行密钥，因此无法在此删除。请先在“账号 > 我的登录”中移除通行密钥（如果这是你唯一的登录方式，请先设置密码），然后再删除此通行密钥。"
+        account_settings_link: "打开账号设置"
+        link_checking: "正在检查你的账号是否已关联通行密钥…"
+        link_check_failed: "无法确认你的账号是否已关联通行密钥，因此暂时无法删除最后一个通行密钥。"
+        retry: "重试"
+        delete_device_hint: "你也可以在设备或密码管理器中将其移除。"
+        add_success: "已添加通行密钥。"
+        rename_success: "已重命名通行密钥。"
+        delete_success: "已删除通行密钥。"
