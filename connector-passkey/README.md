@@ -1,8 +1,10 @@
 # Passkey connector
 
+[English](./README.md) | [中文](./README_CN.md)
+
 > Sign in to Apache Answer with passkeys (WebAuthn / FIDO2): fingerprint, face, screen lock or a security key instead of a password.
 
-The plugin is a connector (it appears next to the other sign-in buttons and under **Account > My Logins**) and a route plugin (it serves the page `/connector-passkey-auth` where the WebAuthn ceremonies run).
+The plugin is a connector (it appears next to the other sign-in buttons and under **Settings > Account > My logins**) and a route plugin (it serves the page `/connector-passkey-auth` where the WebAuthn ceremonies run).
 
 ## Build
 
@@ -11,6 +13,20 @@ The plugin is a connector (it appears next to the other sign-in buttons and unde
 ```
 
 The UI is built with pnpm 9.7.0, the version pinned by the Answer core (`packageManager` in `ui/package.json`). Newer pnpm releases may refuse to install until the esbuild and @swc/core build scripts are approved (`pnpm approve-builds`).
+
+## Quick start
+
+For administrators:
+
+1. Build Answer with the plugin (see Build) and restart it.
+2. Make sure **Admin > Settings > General > Site URL** is the HTTPS address users open in their browser. Passkeys do not work over plain HTTP, except on `http://localhost`.
+3. Enable **Passkey Connector** under **Admin > Plugins > Installed Plugins**. Nothing else needs to be configured; see Configuration for the optional fields.
+
+For users:
+
+1. Sign in as usual, for example with your password.
+2. Open **Settings > Passkey Connector > Manage passkeys** (avatar menu > **Settings**), optionally enter a name, click **Add a passkey**, then **Create a new passkey**. Your browser or device asks you to confirm with your fingerprint, face, screen lock or security key.
+3. Next time, click **Connect with Passkey** on the login page and choose your passkey, or pick it from the username autofill.
 
 ## Requirements
 
@@ -54,14 +70,14 @@ All passkeys of an Answer user share one identity (the user handle), so linking 
 
 Linking always goes through the core bind intent. The page ignores the `state` in its own URL when linking: before each ceremony it asks the core for a bind state minted for the signed-in user (`GET /answer/api/v1/connector/user/info`). A signed-out visitor can only sign in with a state that carries a valid `state_proof` (see Sign in). A crafted link carrying a bind state of another account therefore cannot bind the visitor's passkey to that account.
 
-1. **Link passkeys** / **Add a passkey** on the manage page open `/connector-passkey-auth?mode=bind` (with the typed name, which is used for a new passkey). **Account > My Logins > Connect** next to Passkey arrives with the core's `?state=…` instead, which the page ignores. Either way the page removes `state`, `state_proof` and `name` from the address bar.
+1. **Link passkeys** / **Add a passkey** on the manage page open `/connector-passkey-auth?mode=bind` (with the typed name, which is used for a new passkey). **Settings > Account > My logins > Connect** next to Passkey arrives with the core's `?state=…` instead, which the page ignores. Either way the page removes `state`, `state_proof` and `name` from the address bar.
 2. The user creates a new passkey, or proves one of their existing passkeys. Right before the ceremony the page fetches a bind state minted by the core for the logged-in user.
 3. The server verifies the ceremony and returns the core redirect URL with a one-time token bound to that state.
 4. The core redeems the token and binds the passkey identity to the account, then returns to the account settings.
 
 ### Manage
 
-**Account > Settings > Passkey Connector > Manage passkeys** (or `/connector-passkey-auth?mode=manage`) lists the passkeys of the logged-in user and lets them add, rename and delete passkeys. Up to 20 passkeys per user. The page does not delete the last passkey of an account that is linked to passkeys, or while it cannot check the link status: unbind Passkey under **My Logins** first. The core refuses that unbind when passkeys are a passwordless account's only way to sign in, so the account cannot be locked out this way. This rule is enforced by the page; the plugin API gives the server no way to read the core binding.
+**Settings > Passkey Connector > Manage passkeys** (avatar menu > **Settings**) (or `/connector-passkey-auth?mode=manage`) lists the passkeys of the logged-in user and lets them add, rename and delete passkeys. Up to 20 passkeys per user. The page does not delete the last passkey of an account that is linked to passkeys, or while it cannot check the link status: unbind Passkey under **My Logins** first. The core refuses that unbind when passkeys are a passwordless account's only way to sign in, so the account cannot be locked out this way. This rule is enforced by the page; the plugin API gives the server no way to read the core binding.
 
 ## Security notes
 

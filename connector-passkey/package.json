@@ -6,7 +6,8 @@
   "type": "module",
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "README_CN.md"
   ],
   "main": "./dist/connector-passkey.umd.js",
   "module": "./dist/connector-passkey.es.js",
