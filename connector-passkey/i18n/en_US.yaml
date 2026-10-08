@@ -1,0 +1,124 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+plugin:
+  passkey_connector:
+    backend:
+      name:
+        other: Passkey
+      info:
+        name:
+          other: Passkey Connector
+        description:
+          other: Sign in with passkeys (WebAuthn / FIDO2)
+      config:
+        rp_name:
+          title:
+            other: Relying party name
+          description:
+            other: Name shown by the browser or password manager when a passkey is created. Leave empty to use the host name of the Site URL.
+        rp_id:
+          title:
+            other: Relying party ID
+          description:
+            other: Domain that passkeys are bound to, for example example.com. Leave empty to use the host of the Site URL. Changing it makes every existing passkey unusable.
+        rp_origins:
+          title:
+            other: Allowed origins
+          description:
+            other: Comma-separated origins that may use passkeys, for example https://example.com. Leave empty to use the origin of the Site URL. Each origin must use https (http only for localhost) and be on the relying party ID or one of its subdomains.
+      user_config:
+        manage_passkeys:
+          other: Manage passkeys
+    frontend:
+      common:
+        loading: "Loading…"
+        back_to_login: "Back to sign in"
+      error:
+        bad_request: "The request was invalid. Please reload the page and try again."
+        unauthorized: "Please sign in first."
+        forbidden: "Your account cannot perform this action."
+        plugin_disabled: "Passkey sign-in is disabled on this site."
+        not_configured: "Passkey sign-in is not configured on this site yet."
+        state_required: "This link is incomplete. Please start again."
+        state_unverified: "This sign-in link was not started from this site. Start signing in again from the sign-in page."
+        session_invalid: "This request has expired. Please try again."
+        verification_failed: "The passkey could not be verified."
+        clone_detected: "This passkey was rejected because it may have been copied. Delete it and create a new one."
+        credential_exists: "This passkey is already registered."
+        credential_limit: "You have reached the maximum number of passkeys."
+        credential_not_found: "Passkey not found."
+        invalid_name: "Names must be 1 to 64 characters."
+        internal_error: "Something went wrong on the server. Please try again."
+        network: "Could not reach the server. Check your connection and try again."
+        unknown: "Something went wrong. Please try again."
+      webauthn:
+        not_supported: "This browser does not support passkeys."
+        cancelled: "The passkey request was cancelled or timed out, or no passkey was available."
+        already_registered: "This device already has a passkey for your account."
+        security: "This site's passkey settings do not match its address. Contact the site administrator."
+      login:
+        title: "Sign in with a passkey"
+        description: "Use your fingerprint, face, screen lock or security key."
+        autofill_label: "Username"
+        autofill_placeholder: "Choose a passkey"
+        button: "Sign in with a passkey"
+        redirecting: "Signing you in…"
+        no_passkey_hint: "No passkey yet? Sign in another way, then add one under account settings."
+        missing_state: "This sign-in link is incomplete. Please start again from the sign-in page."
+      bind:
+        title: "Link a passkey"
+        description: "Link a passkey to {{name}} so you can use it to sign in."
+        create_button: "Create a new passkey"
+        use_existing_button: "Use an existing passkey"
+        redirecting: "Linking your passkey…"
+        already_linked: "Passkeys are already linked to this account."
+        manage_link: "Manage passkeys"
+        new_name: "A new passkey will be named \"{{name}}\"."
+      manage:
+        title: "Passkeys"
+        description: "Passkeys let you sign in with your fingerprint, face, screen lock or security key instead of a password."
+        add_button: "Add a passkey"
+        name_label: "Name (optional)"
+        name_placeholder: "For example: MacBook Touch ID"
+        not_linked: "Your passkeys are not linked to this account yet, so you cannot sign in with them."
+        link_button: "Link passkeys"
+        empty: "You have not added any passkeys yet."
+        default_name: "Passkey"
+        created: "Created {{date}}"
+        last_used: "Last used {{date}}"
+        never_used: "Never used"
+        synced: "Synced"
+        rename: "Rename"
+        rename_named: "Rename passkey \"{{name}}\""
+        rename_title: "Rename passkey"
+        save: "Save"
+        cancel: "Cancel"
+        delete: "Delete"
+        delete_named: "Delete passkey \"{{name}}\""
+        delete_title: "Delete passkey"
+        delete_confirm: "Delete the passkey \"{{name}}\"? You will no longer be able to sign in with it."
+        delete_last_warning: "This is your last passkey. After deleting it you cannot sign in with a passkey, so make sure you can still sign in another way, for example with your password."
+        delete_last_linked: "This is the last passkey of an account linked to passkeys, so it cannot be deleted here. First remove Passkey under Account > My logins (if it is your only way to sign in, set a password first), then delete this passkey."
+        account_settings_link: "Open account settings"
+        link_checking: "Checking whether your account is linked to passkeys…"
+        link_check_failed: "Could not check whether your account is linked to passkeys, so your last passkey cannot be deleted right now."
+        retry: "Try again"
+        delete_device_hint: "You can also remove it from your device or password manager."
+        add_success: "Passkey added."
+        rename_success: "Passkey renamed."
+        delete_success: "Passkey deleted."
