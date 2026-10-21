@@ -54,7 +54,6 @@ type ConnectorConfig struct {
 }
 
 var _ plugin.Connector = &Connector{}
-var _ plugin.ConnectorStateRequired = &Connector{}
 
 var loginHTMLContent string
 
